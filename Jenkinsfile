@@ -29,6 +29,16 @@ pipeline {
                 sh '/bin/sh -c "/usr/local/share/dotnet/dotnet publish Jenkins.sln -c Release -o ./publish"'
             }
         }
+stage('Docker Build and Deploy') {
+            steps {
+                echo 'Building Docker image...'
+                sh 'docker build -t dotnet-app-image .' // Build the Docker image from the Dockerfile
+
+                echo 'Running Docker container...'
+                sh 'docker stop dotnet-app-container || true && docker rm dotnet-app-container || true' // Stop and remove any existing container with the same name
+                sh 'docker run -d -p 8080:80 --name dotnet-app-container dotnet-app-image' // Run the container, mapping port 8080 on the host to port 80 on the container
+            }
+        }
     }
 
     post {
